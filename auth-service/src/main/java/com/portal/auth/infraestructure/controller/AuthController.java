@@ -1,5 +1,6 @@
 package com.portal.auth.infraestructure.controller;
 
+import com.portal.auth.application.AuthService;
 import com.portal.auth.application.UserService;
 import com.portal.auth.domain.model.User;
 import com.portal.auth.infraestructure.security.JwtUtil;
@@ -18,13 +19,15 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate = new RestTemplate();
     private final String googleClientId;
 
-    public AuthController(UserService userService, JwtUtil jwtUtil,
+    public AuthController(UserService userService, AuthService authService, JwtUtil jwtUtil,
                           @org.springframework.beans.factory.annotation.Value("${app.oauth.google.client-id}") String googleClientId) {
         this.userService = userService;
+        this.authService = authService;
         this.jwtUtil = jwtUtil;
         this.googleClientId = googleClientId;
     }
@@ -34,15 +37,9 @@ public class AuthController {
         String email = loginRequest.get("email");
         String password = loginRequest.get("passwordHash");
 
-        Optional<User> userOpt = userService.getUserByEmail(email);
-        if (userOpt.isPresent() && userOpt.get().getPasswordHash() != null
-                && userOpt.get().getPasswordHash().equals(password)) {
-            User u = userOpt.get();
-            String token = jwtUtil.generateToken(String.valueOf(u.getId()));
-            return ResponseEntity.ok(Map.of("token", token));
-        } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
-        }
+        return authService.login(email, password)
+                .map(token -> ResponseEntity.ok(Map.of("token", token)))
+                .orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
     }
 
     @PostMapping("/login/google")
