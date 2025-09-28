@@ -16,8 +16,8 @@ app:
     expiration-ms: 86400000 # 1 día
 
 aws:
-  accessKeyId: AKIAU6PMIXQINKSYBOOT
-  secretAccessKey: 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
+  accessKeyId: acces_key
+  secretAccessKey: secret_key
   region: us-east-1
 
 server:

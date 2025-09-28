@@ -19,8 +19,8 @@ app:
       client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
 
 aws:
-  accessKeyId: AKIAU6PMIXQINKSYBOOT
-  secretAccessKey: XW/z0o+6bCt6vYJtsJzJG7aYTYyAkyD/BA8dYMrm
+  accessKeyId: acces_key
+  secretAccessKey: secret_key
   region: us-east-1
 
 server:
