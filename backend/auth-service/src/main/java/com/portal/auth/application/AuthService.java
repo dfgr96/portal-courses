@@ -23,7 +23,7 @@ public class AuthService {
         return userService.getUserByEmail(email)
                 .filter(user -> user.getPasswordHash() != null && user.getPasswordHash().equals(password))
                 .map(user -> {
-                    String token = jwtUtil.generateToken(user.getId().toString());
+                    String token = jwtUtil.generateToken(user.getId().toString(), user.getRole().name());
                     long expiresAt = jwtUtil.getExpiration(token).getTime();
                     tokenRepository.saveToken(token, user.getId().toString(), expiresAt);
                     return token;
