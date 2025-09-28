@@ -73,7 +73,7 @@ public class AuthController {
             user = userService.createUser(newUser);
         }
 
-        String token = jwtUtil.generateToken(String.valueOf(user.getId()));
+        String token = jwtUtil.generateToken(String.valueOf(user.getId()), user.getRole().name());
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

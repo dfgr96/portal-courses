@@ -5,6 +5,7 @@ import com.portal.course.infraestructure.security.JwtAuthenticationFilterWithDyn
 import com.portal.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,7 +34,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/courses/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/courses/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/courses/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
