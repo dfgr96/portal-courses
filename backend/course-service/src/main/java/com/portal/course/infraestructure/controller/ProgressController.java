@@ -1,6 +1,7 @@
 package com.portal.course.infraestructure.controller;
 
 import com.portal.course.application.ProgressService;
+import com.portal.course.domain.model.CourseProgressDto;
 import com.portal.course.domain.model.ModuleProgressDto;
 import com.portal.course.domain.model.ProgressDto;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +30,10 @@ public class ProgressController {
                                                                        @PathVariable Long courseId) {
         List<ModuleProgressDto> list = service.getProgressByCourse(userId, courseId);
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<CourseProgressDto>> getUserCoursesProgress(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getUserCoursesProgress(userId));
     }
 }
