@@ -1,16 +1,15 @@
 package com.portal.course.application;
 
+import com.portal.course.domain.model.CourseProgressDto;
 import com.portal.course.domain.model.ModuleProgressDto;
 import com.portal.course.domain.model.ProgressDto;
 import com.portal.course.domain.model.Section;
-import com.portal.course.infraestructure.repository.ModuleRepository;
-import com.portal.course.infraestructure.repository.ProgressEntity;
-import com.portal.course.infraestructure.repository.ProgressRepository;
+import com.portal.course.infraestructure.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,10 +19,12 @@ public class ProgressService {
 
     private final ProgressRepository progressRepository;
     private final ModuleRepository moduleRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-    public ProgressService(ProgressRepository repository, ModuleRepository moduleRepository) {
+    public ProgressService(ProgressRepository repository, ModuleRepository moduleRepository, EnrollmentRepository enrollmentRepository) {
         this.progressRepository = repository;
         this.moduleRepository = moduleRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Transactional
@@ -77,5 +78,46 @@ public class ProgressService {
                     );
                 })
                 .toList();
+    }
+
+    public List<CourseProgressDto> getUserCoursesProgress(Long userId) {
+        List<EnrollmentEntity> enrollments =
+                enrollmentRepository.findByUserId(userId);
+
+        List<CourseProgressDto> result = new ArrayList<>();
+
+        for (EnrollmentEntity enrollment : enrollments) {
+            Long courseId = enrollment.getCourseId();
+
+            List<Section> modules = moduleRepository.findByCourseIdOrderByOrderIndex(courseId);
+
+            if (modules.isEmpty()) {
+                result.add(new CourseProgressDto(courseId, "Sin módulos", 0, false));
+                continue;
+            }
+
+            int totalPercent = 0;
+            int completedModules = 0;
+
+            for (Section module : modules) {
+                List<ProgressEntity> progresses =
+                        progressRepository.findByUserIdAndModuleId(userId, module.getId());
+
+                if (!progresses.isEmpty()) {
+                    int percent = progresses.get(0).getPercent();
+                    totalPercent += percent;
+                    if (percent == 100) {
+                        completedModules++;
+                    }
+                }
+            }
+
+            int avgPercent = totalPercent / modules.size();
+            boolean completed = completedModules == modules.size();
+
+            result.add(new CourseProgressDto(courseId, "Curso " + courseId, avgPercent, completed));
+        }
+
+        return result;
     }
 }
