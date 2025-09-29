@@ -22,13 +22,13 @@ public class EnrollmentService {
         entity.setCourseId(courseId);
         entity.setStatus(EnrollmentStatus.ACTIVE);
         EnrollmentEntity saved = repository.save(entity);
-        return new EnrollmentDto(saved.getId(), saved.getUserId(), saved.getCourseId(),
+        return new EnrollmentDto(saved.getId(), saved.getCourseId(), saved.getUserId(),
                 saved.getStatus().name(), saved.getEnrolledAt());
     }
 
     public List<EnrollmentDto> getUserEnrollments(Long userId) {
         return repository.findByUserId(userId).stream()
-                .map(e -> new EnrollmentDto(e.getId(), e.getUserId(), e.getCourseId(),
+                .map(e -> new EnrollmentDto(e.getId(), e.getCourseId(), e.getUserId(),
                         e.getStatus().name(), e.getEnrolledAt()))
                 .toList();
     }
